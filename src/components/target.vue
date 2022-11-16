@@ -42,13 +42,26 @@
                   <label>您的监控 IP：</label>
                   <el-input v-model="editForm.TargetIP"></el-input>
                 </div>
+
+                <div style="margin-top: 30px">
+                <el-select :key="Date.now()" v-model="value1" multiple filterable placeholder="请选择" style="width: 100%">
+                  <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                  </el-option>
+                </el-select>
+                </div>
+
+
                 <span slot="footer" class="dialog-footer">
                   <el-button @click="dialogEditVisible = false">取 消</el-button>
                   <el-button type="primary" :loading="loading" @click="dialogSubmit">确 定</el-button>
                 </span>
               </el-dialog>
             </el-col>
-            <el-col span="5">
+            <el-col :span="5">
               <el-button icon="el-icon-delete" @click="deleteConfirm(scope.$index, scope.row.ID)" type="text">删除
               </el-button>
             </el-col>
@@ -68,12 +81,13 @@
 </template>
 
 <script>
-import { nanoid } from 'nanoid';
 
 export default {
   name: "target",
   data() {
     return {
+      options: [],
+      value1:[],
       pagination: {
         page: 1,
         total: 0,
@@ -83,10 +97,19 @@ export default {
       dialogVisible: false,
       dialogEditVisible: false,
       dialogType: "",
-      loading: true,
       ip: "",
       tableData: [
-
+        {
+          CreatedAt:'',
+          CreatedUserID:'',
+          DeletedAt:'',
+          ID:'',
+          Interval:'',
+          Method:'',
+          NodesID:'',
+          TargetIP:'',
+          UpdateAt:''
+        }
       ],
       editForm: {},
     }
@@ -114,7 +137,9 @@ export default {
         this.tableData = res.data.data
         this.pagination.total = res.data.total
         this.loading = false
+        console.log(this.tableData)
       })
+
     },
     dialogSubmit() {
       this.loading = true
@@ -146,7 +171,7 @@ export default {
           this.axios({
             method: 'put',
             url: '/api/target/edit',
-            data: this.editForm
+            data: 'ip='+this.editForm.TargetIP+'&nodeid='+this.value1
           }).then((d) => {
             if (d.data.code == 200) {
               this.$message({
@@ -187,8 +212,9 @@ export default {
       })
     },
     handleEdit(row) {
+      this.getNodeInfo()
       this.dialogType = "mod"
-      this.dialogEditVisible = true
+      // this.dialogEditVisible = true
       this.editForm = row
     },
     handleClose(done) {
@@ -198,22 +224,39 @@ export default {
         })
         .catch(_ => { });
     },
-    deleteRow(index, id) {
-      this.axios.delete('/api/target/' + id).then((d) => {
+    getNodeInfo() {
+      this.axios({
+        method: 'get',
+        url: '/api/user/nodes',
+      }).then((d) => {
         if (d.data.code == 200) {
-          this.tableData.splice(index, 1)
-          this.$message({
-            type: 'success',
-            message: '删除成功',
-          })
+          this.dialogEditVisible = true
+          this.options = d.data.data
         } else {
           this.$message({
-            type: 'error',
-            message: d.data.error,
+            type: "error",
+            message: d.data.error
           })
         }
       })
-    }
+    },
+
+    // getNodeAlreadyInfo() {
+    //   this.axios({
+    //     method: 'get',
+    //     url: '/api/user/list?i',
+    //   }).then((d) => {
+    //     if (d.data.code == 200) {
+    //       this.value1 = d.data.data
+    //     } else {
+    //       this.$message({
+    //         type: "error",
+    //         message: d.data.error
+    //       })
+    //     }
+    //   })
+    // },
+
   },
   mounted() {
     this.refreshTable()
