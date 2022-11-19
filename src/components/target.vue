@@ -19,6 +19,24 @@
             <label>监测 IP：</label>
             <el-input v-model="editForm.IP"></el-input>
           </div>
+          <div style="margin-top: 30px">
+            <label>监测间隔（分钟）</label>
+            <el-input v-model="editForm.Interval"></el-input>
+          </div>
+          <div style="margin-top: 30px">
+            <label>监测协议：</label>
+            <el-select v-model="editForm.Method" placeholder="请选择" style="width: 100%">
+              <el-option v-for="item in options_methods" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </div>
+          <div style="margin-top: 30px">
+            <label>监测节点：</label>
+            <el-select v-model="value" multiple filterable placeholder="请选择" style="width: 100%">
+              <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </div>
           <span slot="footer" class="dialog-footer">
             <el-button @click="dialogVisible = false">取 消</el-button>
             <el-button type="primary" :loading="loading" @click="dialogSubmit">确 定</el-button>
@@ -32,6 +50,15 @@
       </el-table-column>
       <el-table-column prop="TargetIP" label="IP" width="180">
       </el-table-column>
+      <el-table-column prop="Interval" label="监测间隔" width="180">
+      </el-table-column>
+      <el-table-column prop="Method" label="协议" width="180">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.Method == 0">ICMP</el-tag>
+          <el-tag v-if="scope.row.Method == 1">TCP</el-tag>
+          <el-tag v-if="scope.row.Method == 2">UDP</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column>
         <template slot-scope="scope">
           <el-row :gutter="15">
@@ -42,16 +69,24 @@
                   <label>您的监控 IP：</label>
                   <el-input v-model="editForm.TargetIP"></el-input>
                 </div>
-
                 <div style="margin-top: 30px">
-                <el-select :key="Date.now()" v-model="value1" multiple filterable placeholder="请选择" style="width: 100%">
-                  <el-option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
+                  <label>监测间隔（分钟）</label>
+                  <el-input v-model="editForm.Interval"></el-input>
+                </div>
+                <div style="margin-top: 30px">
+                  <label>监测协议：</label>
+                  <el-select v-model="editForm.Method" placeholder="请选择" style="width: 100%">
+                    <el-option v-for="item in options_methods" :key="item.value" :label="item.label"
                       :value="item.value">
-                  </el-option>
-                </el-select>
+                    </el-option>
+                  </el-select>
+                </div>
+                <div style="margin-top: 30px">
+                  <label>监测节点：</label>
+                  <el-select v-model="value" multiple filterable placeholder="请选择" style="width: 100%">
+                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                    </el-option>
+                  </el-select>
                 </div>
 
 
@@ -72,9 +107,9 @@
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="pagination.page"
-        :page-sizes="[7,10, 20, 50, 100]" :page-size="pagination.sizes" layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        :current-page="pagination.page" :page-sizes="[7, 10, 20, 50, 100]" :page-size="pagination.sizes"
+        layout="total, sizes, prev, pager, next, jumper" :total="pagination.total">
       </el-pagination>
     </div>
   </el-tabs>
@@ -87,7 +122,14 @@ export default {
   data() {
     return {
       options: [],
-      value1:[],
+      options_methods: [
+        { value: 0, label: "ICMP" },
+        { value: 1, label: "TCP" },
+        { value: 2, label: "UDP" },
+      ],
+      value: [],
+      value_methods: [0],
+      interval: 0,
       pagination: {
         page: 1,
         total: 0,
@@ -98,17 +140,18 @@ export default {
       dialogEditVisible: false,
       dialogType: "",
       ip: "",
+      nodeData: [],
       tableData: [
         {
-          CreatedAt:'',
-          CreatedUserID:'',
-          DeletedAt:'',
-          ID:'',
-          Interval:'',
-          Method:'',
-          NodesID:'',
-          TargetIP:'',
-          UpdateAt:''
+          CreatedAt: '',
+          CreatedUserID: '',
+          DeletedAt: '',
+          ID: '',
+          Interval: '',
+          Method: '',
+          NodesID: '',
+          TargetIP: '',
+          UpdateAt: ''
         }
       ],
       editForm: {},
@@ -148,7 +191,7 @@ export default {
           this.axios({
             method: 'post',
             url: '/api/target/add',
-            data: 'ip=' + this.editForm.IP
+            data: 'ip=' + this.editForm.IP + '&nodeid=' + this.value  + '&interval=' + this.editForm.Interval + '&method=' + this.editForm.Method
           }).then((d) => {
             if (d.data.code == 200) {
               this.$message({
@@ -171,7 +214,7 @@ export default {
           this.axios({
             method: 'put',
             url: '/api/target/edit',
-            data: 'ip='+this.editForm.TargetIP+'&nodeid='+this.value1
+            data: 'ID=' + this.editForm.ID +'&ip=' + this.editForm.TargetIP + '&nodeid=' + this.value  + '&interval=' + this.editForm.Interval + '&method=' + this.editForm.Method
           }).then((d) => {
             if (d.data.code == 200) {
               this.$message({
@@ -194,6 +237,7 @@ export default {
     },
     addNode() {
       this.editForm = {}
+      this.value = []
       this.dialogType = "add"
       this.dialogVisible = true
     },
@@ -212,10 +256,18 @@ export default {
       })
     },
     handleEdit(row) {
-      this.getNodeInfo()
+      this.handleTargetNode(row)
       this.dialogType = "mod"
-      // this.dialogEditVisible = true
+      this.dialogEditVisible = true
       this.editForm = row
+
+    },
+    handleTargetNode(row) {
+      this.value = []
+      var r = row.NodesID.split(",")
+      for (var i = 0; i < r.length; i++) {
+        this.value.push(r[i])
+      }
     },
     handleClose(done) {
       this.$confirm('确认关闭？')
@@ -227,10 +279,10 @@ export default {
     getNodeInfo() {
       this.axios({
         method: 'get',
-        url: '/api/user/nodes',
+        url: '/api/user/nodes?size=200',
       }).then((d) => {
         if (d.data.code == 200) {
-          this.dialogEditVisible = true
+          this.dialogEditVisible = false
           this.options = d.data.data
         } else {
           this.$message({
@@ -240,7 +292,22 @@ export default {
         }
       })
     },
-
+    deleteRow(index, id) {
+      this.axios.delete('/api/target/' + id).then((d) => {
+        if (d.data.code == 200) {
+          this.tableData.splice(index, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功',
+          })
+        } else {
+          this.$message({
+            type: 'error',
+            message: d.data.error,
+          })
+        }
+      })
+    }
     // getNodeAlreadyInfo() {
     //   this.axios({
     //     method: 'get',
@@ -260,6 +327,7 @@ export default {
   },
   mounted() {
     this.refreshTable()
+    this.getNodeInfo()
   }
 }
 
