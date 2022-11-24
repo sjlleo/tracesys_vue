@@ -23,7 +23,7 @@
                 </el-submenu>
 
                 <el-submenu index="4">
-                    <template slot="title"><i class="el-icon-s-opportunity"></i>健康系统</template>
+                    <template slot="title"><i class="el-icon-s-opportunity"></i>用户管理</template>
                     <el-menu-item-group>
                         <el-menu-item index="/StudentIndex/StudentHealth">健康申报</el-menu-item>
                         <el-menu-item index="/StudentIndex/StudentHealthRecord">申报记录</el-menu-item>

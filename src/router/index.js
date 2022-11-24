@@ -5,6 +5,7 @@ import Node from '../components/node'
 import Target from '../components/target'
 import AdminIndex from "../views/adminPanel"
 import IPQuery from "../components/ipinfo"
+import Chart from "../components/chartInfo"
 
 Vue.use(VueRouter)
 
@@ -31,6 +32,12 @@ const router = new VueRouter({
                     path: 'target',
                     component: Target,
                     meta: { title: '监测 IP 管理' },
+                },
+                {
+                    name: 'chartInfo',
+                    path: 'chart/:method/:nodeID/:targetIP',
+                    component: Chart,
+                    meta: { title: '图表' },
                 }
             ]
         },

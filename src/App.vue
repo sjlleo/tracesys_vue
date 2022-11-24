@@ -1,5 +1,5 @@
-<template>    
-    <router-view></router-view>
+<template>
+  <router-view v-if="isRouterAlive"></router-view>
 </template>
 
 <script>
@@ -7,7 +7,23 @@
 
 export default {
   name: 'App',
-  components: {}
+  components: {},
+  data() {
+    return {
+      isRouterAlive: true
+    }
+  },
+  methods: {
+    reloadRouter() {
+      this.isRouterAlive = false
+      this.$nextTick(() => (this.isRouterAlive = true))
+    }
+  },
+  mounted() {
+    this.$bus.$on('reloadRouter', () => {
+      this.reloadRouter()
+    })
+  }
 }
 </script>
 
