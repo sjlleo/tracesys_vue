@@ -26,8 +26,8 @@
                 <div style="margin-top: 20px">
                   <label>权限：</label>
                   <el-radio-group v-model="editForm.Role" size="small">
-                    <el-radio-button label="1">管理员</el-radio-button>
-                    <el-radio-button label="2">用户</el-radio-button>
+                    <el-radio-button :label="1">管理员</el-radio-button>
+                    <el-radio-button :label="2">用户</el-radio-button>
                   </el-radio-group>
                 </div>
                 <span slot="footer" class="dialog-footer">
@@ -70,8 +70,8 @@
                 <div style="margin-top: 20px">
                   <label>权限：</label>
                   <el-radio-group v-model="editForm.Role" size="small">
-                    <el-radio-button label="1">管理员</el-radio-button>
-                    <el-radio-button label="2">用户</el-radio-button>
+                    <el-radio-button :label="1">管理员</el-radio-button>
+                    <el-radio-button :label="2">用户</el-radio-button>
                   </el-radio-group>
                 </div>
                 <span slot="footer" class="dialog-footer">

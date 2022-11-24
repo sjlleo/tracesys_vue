@@ -71,7 +71,14 @@ export default {
                                 'role': res.data.role
                             }
                             window.localStorage.setItem("user", JSON.stringify(storage))
-                            this.$router.push("/admin")
+                            switch (storage.role) {
+                              case 1:
+                              this.$router.push("/admin")
+                              break
+                              case 2:
+                              this.$router.push("/user")
+                              break
+                            }
                         } else {
                             this.$message({type: 'error', message:'用户名或密码错误'})
                         }

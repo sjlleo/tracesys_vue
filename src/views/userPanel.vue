@@ -11,10 +11,10 @@
 </template>
 
 <script>
-import sidebar from "../components/admin/sidebar"
+import sidebar from "../components/user/sidebar"
 import navbar from "../components/navbar"
 export default {
-    name: 'adminPanel',
+    name: 'userPanel',
     components: {sidebar, navbar},
 }
 </script>

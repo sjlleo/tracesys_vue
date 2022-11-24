@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import ttlchart from '../components/ttlchart'
-import spchart from '../components/spchart'
+import ttlchart from '../ttlchart'
+import spchart from '../spchart'
 
 Date.prototype.Format = function (fmt) { // author: meizz
     var o = {

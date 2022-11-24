@@ -4,5 +4,6 @@ module.exports = defineConfig({
   lintOnSave:false,
   devServer: {
     proxy: 'https://api.trace.ac',
+    port: 8080
   },
 })

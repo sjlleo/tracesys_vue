@@ -1,13 +1,13 @@
 <template>
   <el-tabs type="border-card">
-    <el-tab-pane label="节点管理"></el-tab-pane>
+    <el-tab-pane label="监测管理"></el-tab-pane>
     <el-row :gutter="20">
       <el-col :span="6">
         <el-input placeholder="请输入IP" v-model="ip" clearable></el-input>
       </el-col>
       <el-col :span="6">
         <el-row>
-          <el-button type="primary" plain>查询</el-button>
+          <el-button type="primary" @click="search" plain>查询</el-button>
         </el-row>
       </el-col>
     </el-row>
