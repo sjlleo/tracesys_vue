@@ -47,7 +47,7 @@ export default {
     },
     methods: {
         refresh() {
-            this.$bus.$emit('reloadRouter')            
+            this.$bus.$emit('reloadRouter')
         }
     },
     mounted() {

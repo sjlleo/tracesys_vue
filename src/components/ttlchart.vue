@@ -1,5 +1,12 @@
 <template>
-    <div ref="chart" style="width: 600px;height:400px;"></div>
+    <div>
+        <div style="margin-top: 20px">
+            <el-radio-group v-model="$route.params.nodeID" size="small">
+                <el-radio-button v-for="k in nodeIDarr" index="/chart/" :key="k" :label="k"></el-radio-button>
+            </el-radio-group>
+        </div>
+        <div ref="chart" style="width: 600px;height:400px;"></div>
+    </div>
 </template>
 
 <script>
@@ -8,13 +15,32 @@ export default {
     name: 'Echarts',
     data() {
         return {
+            ip: "",
+            nodeIDarr: [],
             myChart: undefined,
             chartData: []
         }
     },
     methods: {
+        goNewChart(id) {
+            this.$router.replace({
+                name: 'Chart',
+                params: {
+                    nodeID: id,
+                    method: parseInt(this.$route.params.method),
+                    targetIP: this.$route.params.targetIP,
+                }
+            })
+        },
+        fetchNodeInfo() {
+            this.axios({
+                url: '/api/target/' + this.ip,
+                method: 'GET',
+            }).then((d) => {
+                this.nodeIDarr = d.data.nodeid
+            })
+        },
         fetchData(postData) {
-
             this.axios({
                 method: 'post',
                 url: "/api/result",
@@ -164,12 +190,14 @@ export default {
             myChart.setOption(option);
         }
     },
-    mounted() {
+    async mounted() {
         this.myChart = this.echarts.init(this.$refs.chart);
         this.myChart.showLoading();
-        this.$bus.$on('ttlChartData', (data) => {
+        await this.$bus.$on('ttlChartData', (data) => {
+            this.ip = data.targetIP
             this.fetchData(data)
         })
+        this.fetchNodeInfo()
     },
     beforeDestroy() {
         this.$bus.$off('ttlChartData')
