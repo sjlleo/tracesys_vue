@@ -1,12 +1,6 @@
 <template>
-    <div>
-        <div style="margin-top: 20px">
-            <el-radio-group v-model="$route.params.nodeID" size="small">
-                <el-radio-button v-for="k in nodeIDarr" index="/chart/" :key="k" :label="k"></el-radio-button>
-            </el-radio-group>
-        </div>
-        <div ref="chart" style="width: 600px;height:400px;"></div>
-    </div>
+
+        <div ref="chart" style="height:400px; width: 100%;"></div>
 </template>
 
 <script>
@@ -16,30 +10,11 @@ export default {
     data() {
         return {
             ip: "",
-            nodeIDarr: [],
             myChart: undefined,
             chartData: []
         }
     },
     methods: {
-        goNewChart(id) {
-            this.$router.replace({
-                name: 'Chart',
-                params: {
-                    nodeID: id,
-                    method: parseInt(this.$route.params.method),
-                    targetIP: this.$route.params.targetIP,
-                }
-            })
-        },
-        fetchNodeInfo() {
-            this.axios({
-                url: '/api/target/' + this.ip,
-                method: 'GET',
-            }).then((d) => {
-                this.nodeIDarr = d.data.nodeid
-            })
-        },
         fetchData(postData) {
             this.axios({
                 method: 'post',
@@ -47,6 +22,7 @@ export default {
                 data: postData,
             }).then((d) => {
                 this.chartData = d.data.res
+                this.$bus.$emit('routeTableData', this.chartData)
                 this.chartData = this.chartData.filter((v) => {
                     return v.created_time == this.chartData[0].created_time
                 })
@@ -191,13 +167,15 @@ export default {
         }
     },
     async mounted() {
+        this.radioID = this.$route.params.nodeID
         this.myChart = this.echarts.init(this.$refs.chart);
         this.myChart.showLoading();
-        await this.$bus.$on('ttlChartData', (data) => {
+        await this.$bus.$on('ttlChartData', async (data) => {
+            this.myChart.showLoading();
             this.ip = data.targetIP
-            this.fetchData(data)
+            await this.fetchData(data)
+            // this.$nextTick()
         })
-        this.fetchNodeInfo()
     },
     beforeDestroy() {
         this.$bus.$off('ttlChartData')

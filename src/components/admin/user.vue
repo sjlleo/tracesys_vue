@@ -258,7 +258,7 @@ export default {
                 .catch(_ => { });
         },
         deleteRow(index, id) {
-            this.axios.delete('/api/user').then((d) => {
+            this.axios.delete('/api/user/' + id).then((d) => {
                 if (d.data.code == 200) {
                     this.tableData.splice(index, 1)
                     this.$message({

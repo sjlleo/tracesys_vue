@@ -154,17 +154,17 @@ export default {
       ip: "",
       nodeData: [],
       tableData: [
-        {
-          CreatedAt: '',
-          CreatedUserID: '',
-          DeletedAt: '',
-          ID: '',
-          interval: 10,
-          method: 0,
-          nodeid: [],
-          ip: '',
-          UpdateAt: ''
-        }
+        // {
+        //   CreatedAt: '',
+        //   CreatedUserID: '',
+        //   DeletedAt: '',
+        //   ID: '',
+        //   interval: 10,
+        //   method: 0,
+        //   nodeid: [],
+        //   ip: '',
+        //   UpdateAt: ''
+        // }
       ],
       editForm: {},
     }
