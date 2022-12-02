@@ -17,20 +17,56 @@ export default {
     reloadRouter() {
       this.isRouterAlive = false
       this.$nextTick(() => (this.isRouterAlive = true))
+    },
+    islogin() {
+      const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          background: 'rgba(255, 255, 255, 1)'
+        });
+      this.axios.get("/api/user/info").then(
+        r => {
+          if (r.data.code == 401) {
+            console.log(this.$route.fullPath)
+            if (this.$route.fullPath != "/") {
+              this.$message({ type: 'error', message: '您的登录已过期或尚未登录'})
+
+            }
+            localStorage.removeItem("user");
+            this.$router.push("/")
+          } else {
+            switch (r.data.role) {
+                case 1:
+                  this.$router.push("/admin/dashboard")
+                  break
+                case 2:
+                  this.$router.push("/user")
+                  break
+              }
+          }
+          loading.close();
+        }
+      )
     }
   },
   mounted() {
     this.$bus.$on('reloadRouter', () => {
       this.reloadRouter()
     })
+    this.islogin()
   }
 }
 </script>
 
-<style>
-html {
-  height: 100%;
+<style scoped>
+html,
+body {
+  /* height: 100%; */
+  width: 100%;
+  margin: 0%;
+
 }
+
 
 body {
   display: flex;

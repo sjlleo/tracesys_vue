@@ -14,6 +14,6 @@ iframe {
 }
 
 .el-tabs__content {
-    height: 110%;
+    height: 120%;
 }
 </style>

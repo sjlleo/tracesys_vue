@@ -24,6 +24,13 @@
             </el-submenu>
 
             <el-submenu index="4">
+                <template slot="title"><i class="el-icon-menu"></i>消息报警管理</template>
+                <el-menu-item-group>
+                    <el-menu-item index="/user/task">提醒任务管理</el-menu-item>
+                </el-menu-item-group>
+            </el-submenu>
+
+            <el-submenu index="5">
                 <template slot="title"><i class="el-icon-s-tools"></i>设置</template>
                 <el-menu-item-group>
                     <el-menu-item index="/user/password">修改密码</el-menu-item>
@@ -52,3 +59,9 @@ export default {
     }
 }
 </script>
+
+<style>
+.el-aside {
+    height: 93vh;
+}
+</style>

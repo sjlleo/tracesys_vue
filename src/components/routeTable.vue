@@ -1,5 +1,6 @@
 <template>
-    <el-table :data="tableData" style="width: 100%; margin-top: -70px;" height="800" :row-class-name="tableRowClassName">
+    <el-table v-if="isshow" :data="tableData" style="width: 100%; margin-top: -70px;" height="800"
+        :row-class-name="tableRowClassName">
         <el-table-column prop="ttl" label="TTL" width="50px">
         </el-table-column>
         <el-table-column prop="ip_list" label="IP" width="fix-content">
@@ -33,6 +34,28 @@
 <script>
 export default {
     methods: {
+        getGeo() {
+            this.tableData.forEach((r, i) => {
+                r.ip_list.forEach(async (ip, q) => {
+                    let str = await this.getGeoPromise(ip)
+                    this.tableData[i].ip_list[q] += str
+                    // this.isshow = false
+                    // this.$nextTick(() => {
+                    //     this.isshow = true
+                    // })
+                })
+
+            })
+
+            // this.$set(this.tableData,index,row);
+        },
+        async getGeoPromise(row) {
+            let str = ''
+            await this.axios.get('https://ip.trace.ac/api/v1/' + row + '?token=leomoe2022').then((r) => {
+                str = " " + r.data.country + " " + r.data.prov + " " + r.data.city;
+            })
+            return str
+        },
         pklsFormatter(row) {
             if (row.packet_loss != undefined) {
                 return row.packet_loss * 100 + '%'
@@ -68,7 +91,7 @@ export default {
                         ttl: i + 2,
                         ip_list: ["*"],
                     }
-                    d.splice(i+1, 0, obj)
+                    d.splice(i + 1, 0, obj)
                     i++
                 }
             }
@@ -84,15 +107,18 @@ export default {
             this.ASCTableDataByID()
             this.AddNullHop()
             this.FilterHop()
+            this.getGeo()
         }
     },
     data() {
         return {
-            tableData: []
+            tableData: [],
+            isshow: true
         }
     },
     mounted() {
         this.$bus.$on('routeTableData', this.InitTable)
+        console.log(this.isshow)
     }
 }
 </script>

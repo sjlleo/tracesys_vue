@@ -283,7 +283,8 @@ export default {
   
 <style>
 .el-tabs {
-    width: 100%;
+    /* width: 100%; */
+    overflow: hidden;
 }
 
 .block {

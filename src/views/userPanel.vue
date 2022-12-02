@@ -1,7 +1,7 @@
 <template>
     <div style="width: 100%;">
         <navbar/>
-        <el-container style="height: 780px; border: 1px solid #eee">
+        <el-container style="border: 1px solid #eee">
         <sidebar/>
         <router-view></router-view>
    </el-container>
@@ -18,3 +18,9 @@ export default {
     components: {sidebar, navbar},
 }
 </script>
+
+<style>
+.el-container {
+    height: 100%;
+}
+</style>

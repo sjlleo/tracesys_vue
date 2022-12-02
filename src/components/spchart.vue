@@ -1,10 +1,16 @@
 <template>
     <div style="width: 100%;">
         <label>TTL：</label>
-        <el-select style="margin-bottom: 10px;" v-model="select" @change="handleSelect" slot="prepend"
-            placeholder="请选择">
-            <el-option v-for="num in ttl_option" :key="num" :label="num" :value="num"></el-option>
-        </el-select>
+        <div>
+            <el-select style="margin-bottom: 10px;" v-model="select" @change="handleSelect" slot="prepend"
+                placeholder="请选择">
+                <el-option v-for="num in ttl_option" :key="num" :label="num" :value="num"></el-option>
+            </el-select>
+            <el-date-picker style="margin-left: 10px;" @change="restartEchart" v-model="dateSelect" type="daterange"
+                align="right" unlink-panels range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                :picker-options="pickerOptions">
+            </el-date-picker>
+        </div>
         <div ref="chart" style="height:400px;"></div>
         <div style="width:fit-content;">
             <el-tag style="background-color: #26ff00; color: black;">0% Loss</el-tag>
@@ -39,6 +45,8 @@ export default {
     name: 'Echarts',
     data() {
         return {
+            headerData : {},
+            dateSelect: '',
             subText: '',
             beforeIndex: 1,
             myChart: undefined,
@@ -47,9 +55,58 @@ export default {
             chartData: [],
             pieces: [],
             select: undefined,
+            pickerOptions: {
+                shortcuts: [
+                    {
+                        text: '最近2小时',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 2);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    },
+                    {
+                        text: '最近一天',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    },
+                    {
+                        text: '最近一周',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近一个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }, {
+                        text: '最近三个月',
+                        onClick(picker) {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                            picker.$emit('pick', [start, end]);
+                        }
+                    }]
+            },
         }
     },
     methods: {
+        restartEchart() {
+            this.fetchData(this.headerData)
+        },
         handleSelect() {
             this.InitData()
         },
@@ -62,7 +119,7 @@ export default {
                     nontargetIPMaxTTL = v.ttl
                 }
                 if (v.ip_list.indexOf(this.$route.params.targetIP) != -1 && v.ttl < targetIPMinTTL) {
-                    if (this.chartData[0].method == 0 && v.ttl > nontargetIPMaxTTL || this.chartData[0].method != 0) {
+                    if ((this.chartData[0].method == 0 && v.ttl > nontargetIPMaxTTL) || this.chartData[0].method != 0) {
                         console.log(nontargetIPMaxTTL)
                         console.log(targetIPMinTTL)
 
@@ -77,6 +134,10 @@ export default {
             console.log(targetIPMinTTL)
             this.ttl_option.sort((a, b) => a - b)
             return targetIPMinTTL
+        },
+        converTimeV2(timeString) {
+            const time = new Date(timeString)
+            return new Date(time.getFullYear(), time.getMonth(), time.getDate(), time.getHours() - 2, time.getMinutes(), time.getSeconds())
         },
         DateAddSeconds(time, seconds) {
             time = time.replace(/\-/g, "/");
@@ -132,7 +193,7 @@ export default {
             var tmpIndex = 1
             var tmpArr = { avgRTT: 0.00, created_time: "2022-11-26 13:40:12", interval: 6, ip_list: [this.$route.params.targetIP], maxRTT: 0.00, minRTT: 20000.00, packet_loss: 0.00, ttl: 1 }
             this.chartData.forEach((v, i) => {
-                // 检查是否一次完整的路由记录已经遍历完成  
+                // 检查是否一次完整的路由记录已经遍历完成
                 if (v.ip_list.indexOf(this.$route.params.targetIP) != -1 && this.select == targetIPMinTTL) {
                     if (targetIPMinTTL == v.ttl) {
                         tmpIndex = i
@@ -242,11 +303,19 @@ export default {
             }
             // this.chartData = this.chartData.sort((before, after) => before.created_time - after.created_time)
             // console.log(this.chartData)
-
+            console.log("计算完成")
 
             this.myEcharts()
         },
         fetchData(postData) {
+            if (this.dateSelect == "") {
+                let startDate = this.converTimeV2(Date.now())
+                this.dateSelect = [startDate, new Date(postData.endDate)]
+                postData.startDate = startDate.Format("yyyy-MM-dd hh:mm:ss")
+            } else {
+                postData.startDate = this.dateSelect[0].Format("yyyy-MM-dd hh:mm:ss")
+                postData.endDate = this.dateSelect[1].Format("yyyy-MM-dd hh:mm:ss")
+            }
 
             this.axios({
                 method: 'post',
@@ -402,6 +471,7 @@ export default {
         this.myChart = this.echarts.init(this.$refs.chart)
         this.myChart.showLoading();
         this.$bus.$on('spChartData', async (data) => {
+            this.headerData = data
             this.myChart.showLoading();
             this.ttl_option = []
             await this.fetchData(data)

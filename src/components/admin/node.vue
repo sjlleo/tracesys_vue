@@ -16,40 +16,42 @@
         <el-button icon="el-icon-plus" size="small" @click="addNode" type="primary">添加节点</el-button>
         <el-dialog title="添加节点信息" :visible.sync="dialogVisible" width="30%">
           <div>
-                  <label>您的节点 IP：</label>
-                  <el-input v-model="editForm.IP"></el-input>
-                </div>
-                <div style="margin-top: 20px;">
-                  <label> 您的节点密钥：</label>
-                  <el-input placeholder="留空自动生成" v-model="editForm.secret"></el-input>
-                </div>
-                <div style="margin-top: 20px">
-                  <label>权限：</label>
-                  <el-radio-group v-model="editForm.Role" size="small">
-                    <el-radio-button :label="1">管理员</el-radio-button>
-                    <el-radio-button :label="2">用户</el-radio-button>
-                  </el-radio-group>
-                </div>
-                <span slot="footer" class="dialog-footer">
-                  <el-button @click="dialogVisible = false">取 消</el-button>
-                  <el-button type="primary" :loading="loading" @click="dialogSubmit">确 定</el-button>
-                </span>
+            <label>您的节点 IP：</label>
+            <el-input v-model="editForm.IP"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
+            <label> 您的节点密钥：</label>
+            <el-input placeholder="留空自动生成" v-model="editForm.secret"></el-input>
+          </div>
+          <div style="margin-top: 20px">
+            <label>权限：</label>
+            <el-radio-group v-model="editForm.Role" size="small">
+              <el-radio-button :label="1">管理员</el-radio-button>
+              <el-radio-button :label="2">用户</el-radio-button>
+            </el-radio-group>
+          </div>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" :loading="loading" @click="dialogSubmit">确 定</el-button>
+          </span>
         </el-dialog>
       </el-col>
     </el-row>
 
-    <el-table v-loading="loading" style="margin-top: 20px;" :data="tableData">
-      <el-table-column prop="ID" label="序号" width="180">
+    <el-table v-if="showtable" v-loading="loading" style="margin-top: 20px;" :data="tableData">
+      <el-table-column prop="ID" label="序号" width="100">
       </el-table-column>
-      <el-table-column prop="IP" label="IP" width="180">
+      <el-table-column prop="IP" label="IP" width="250">
       </el-table-column>
-      <el-table-column prop="Role" label="权限">
+      <el-table-column prop="geo" label="地理位置" width="150">
+      </el-table-column>
+      <el-table-column prop="Role" label="权限" width="90">
         <template slot-scope="scope">
           <el-tag type="success" v-if="scope.row.Role == 1">管理员</el-tag>
           <el-tag v-if="scope.row.Role == 2">用户</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="secret" label="密钥">
+      <el-table-column prop="secret" label="密钥" width="250">
       </el-table-column>
       <el-table-column prop="Lastseen" label="最后一次在线时间">
       </el-table-column>
@@ -95,9 +97,9 @@
       </el-table-column>
     </el-table>
     <div class="block">
-      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="pagination.page"
-        :page-sizes="[7,10, 20, 50, 100]" :page-size="pagination.sizes" layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        :current-page="pagination.page" :page-sizes="[7, 10, 20, 50, 100]" :page-size="pagination.sizes"
+        layout="total, sizes, prev, pager, next, jumper" :total="pagination.total">
       </el-pagination>
     </div>
   </el-tabs>
@@ -110,6 +112,7 @@ export default {
   name: "node",
   data() {
     return {
+      showtable: true,
       pagination: {
         page: 1,
         total: 0,
@@ -128,6 +131,20 @@ export default {
     }
   },
   methods: {
+     getGeo() {
+      this.tableData.forEach( async (r,i) => {
+        let str = await this.getGeoPromise(r)
+        this.tableData[i].geo = str
+      })
+      // this.$set(this.tableData,index,row);
+    },
+    async getGeoPromise(row) {
+      let str = ''
+      await this.axios.get('https://ip.trace.ac/api/v1/' + row.IP + '?token=leomoe2022').then((r) => {
+        str =  " " + r.data.country + " " + r.data.prov + " " + r.data.city;
+      })
+      return str
+    },
     search() {
       this.loading = true
       this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
@@ -144,9 +161,9 @@ export default {
       this.pagination.page = page
       this.refreshTable()
     },
-    refreshTable() {
+    async refreshTable() {
       this.loading = true
-      this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes).then((res) => {
+      await this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes).then((res) => {
         this.tableData = res.data.data
         this.pagination.total = res.data.total
         this.loading = false
@@ -254,8 +271,9 @@ export default {
       })
     }
   },
-  mounted() {
-    this.refreshTable()
+  async mounted() {
+    await this.refreshTable()
+    this.getGeo()
   }
 }
 
@@ -267,6 +285,7 @@ export default {
 }
 
 .block {
-  margin-top: 30px;
+  bottom: 30px;
+  position: fixed;
 }
 </style>

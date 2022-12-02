@@ -1,7 +1,7 @@
 <template>
-    <div style="margin-left: 20px; width: 100%;">
+    <div style="padding: 10px 0px 0px 54px;">
         <h2>监测IP：{{ $route.params.targetIP }}</h2>
-        <el-row :gutter="1">
+        <el-row>
             <el-col :span="2">
                 <el-button size="small" icon="el-icon-back" @click="$router.back()" round>返回</el-button>
             </el-col>
@@ -117,7 +117,10 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.el-row {
+    margin-top: 20px;
+}
 .Echarts{
     margin-top: 20px;
     width: 100%;

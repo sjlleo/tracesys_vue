@@ -54,6 +54,8 @@
       </el-table-column>
       <el-table-column prop="ip" label="IP" width="180">
       </el-table-column>
+      <el-table-column prop="geo" label="地理位置" width="150">
+      </el-table-column>
       <el-table-column prop="interval" label="监测间隔" width="180">
       </el-table-column>
       <el-table-column prop="method" label="协议" width="180">
@@ -170,6 +172,20 @@ export default {
     }
   },
   methods: {
+    getGeo() {
+      this.tableData.forEach( async (r,i) => {
+        let str = await this.getGeoPromise(r)
+        this.tableData[i].geo = str
+      })
+      // this.$set(this.tableData,index,row);
+    },
+    async getGeoPromise(row) {
+      let str = ''
+      await this.axios.get('https://ip.trace.ac/api/v1/' + row.ip + '?token=leomoe2022').then((r) => {
+        str =  " " + r.data.country + " " + r.data.prov + " " + r.data.city;
+      })
+      return str
+    },
     pushShow(rowData) {
       this.$router.push({
         name: 'chartInfo',
@@ -196,9 +212,9 @@ export default {
       this.pagination.page = page
       this.refreshTable()
     },
-    refreshTable() {
+    async refreshTable() {
       this.loading = true
-      this.axios.get('/api/target/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes).then((res) => {
+      await this.axios.get('/api/target/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes).then((res) => {
         this.tableData = res.data.data
         this.pagination.total = res.data.total
         this.loading = false
@@ -327,9 +343,10 @@ export default {
       })
     }
   },
-  mounted() {
-    this.refreshTable()
+  async mounted() {
+    await this.refreshTable()
     this.getNodeInfo()
+    this.getGeo()
   }
 }
 

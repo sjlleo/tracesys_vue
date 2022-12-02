@@ -1,96 +1,102 @@
 <template>
-    <div class="login-container">
-        <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on"
-            label-position="left">
+  <div class="login-container">
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on"
+      label-position="left">
 
-            <div class="title-container">
-                <h3 class="title">Login Form</h3>
-            </div>
+      <div class="title-container">
+        <h3 class="title">网络工具系统登录</h3>
+      </div>
 
-            <el-form-item prop="username">
-                <el-input ref="username" v-model="loginForm.username" placeholder="Username" name="username" type="text"
-                    tabindex="1" autocomplete="on" prop="username" />
-            </el-form-item>
+      <el-form-item prop="username">
+        <el-input ref="username" v-model="loginForm.username" placeholder="Username" name="username" type="text"
+          tabindex="1" autocomplete="on" prop="username" />
+      </el-form-item>
 
-            <el-tooltip content="Caps lock is On" placement="right" manual>
-                <el-form-item prop="password">
+      <el-tooltip content="Caps lock is On" placement="right" manual>
+        <el-form-item prop="password">
 
-                    <el-input ref="password" v-model="loginForm.password" type="password" placeholder="Password"
-                        name="password" tabindex="2" autocomplete="on" @keyup.enter.native="handleLogin('loginForm')" maxlength="30" prop="password"/>
-                </el-form-item>
-            </el-tooltip>
+          <el-input ref="password" v-model="loginForm.password" type="password" placeholder="Password" name="password"
+            tabindex="2" autocomplete="on" @keyup.enter.native="handleLogin('loginForm')" maxlength="30"
+            prop="password" />
+        </el-form-item>
+      </el-tooltip>
 
-            <el-button type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin('loginForm')">Login</el-button>
-        </el-form>
-    </div>
+      <el-button type="primary" :loading="loading" style="width:100%;margin-bottom:30px;"
+        @click.native.prevent="handleLogin('loginForm')">Login</el-button>
+    </el-form>
+  </div>
 </template>
 
 <script>
 
 export default {
-    name: "login",
-    data() {
-        var validateAccount = (rule, value, callback) => {
-            if (value === '') {
-                return callback(new Error("账号不能为空"));
-            } else {
-                callback();
-            }
-        }
-        var validatePass = (rule, value, callback) => {
-            if (value === '') {
-                callback(new Error('请输入密码'))
-            } else {
-                callback()
-            }
-        }
-        return {
-            loginRules: {
-                username: [{validator: validateAccount, trigger: 'blur'}],
-                password: [{validator: validatePass, trigger: 'blur'}],
-            },
-            loginForm: {
-                username: "",
-                password: "",
-            }
-        }
-    },
-    methods: {
-        handleLogin(formName) {
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                    this.axios({
-                        url: "/api/login",
-                        method: "post",
-                        data: "username=" + this.loginForm.username + "&password=" + this.loginForm.password
-                    }).then((res) => {
-                        if (res.data.code == 200) {
-                            console.log(res.data)
-                            const storage = {
-                                'name': this.loginForm.username,
-                                'role': res.data.role
-                            }
-                            window.localStorage.setItem("user", JSON.stringify(storage))
-                            switch (storage.role) {
-                              case 1:
-                              this.$router.push("/admin")
-                              break
-                              case 2:
-                              this.$router.push("/user")
-                              break
-                            }
-                        } else {
-                            this.$message({type: 'error', message:'用户名或密码错误'})
-                        }
-                    })
-                }
-                else {
-                    
-                }
-            })
-            console.log(this.loginForm)
-        }
+  name: "login",
+  data() {
+    var validateAccount = (rule, value, callback) => {
+      if (value === '') {
+        return callback(new Error("账号不能为空"));
+      } else {
+        callback();
+      }
     }
+    var validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else {
+        callback()
+      }
+    }
+    return {
+      loading: false,
+      loginRules: {
+        username: [{ validator: validateAccount, trigger: 'blur' }],
+        password: [{ validator: validatePass, trigger: 'blur' }],
+      },
+      loginForm: {
+        username: "",
+        password: "",
+      }
+    }
+  },
+  methods: {
+    handleLogin(formName) {
+      this.$refs[formName].validate((valid) => {
+        this.loading = true
+        if (valid) {
+          this.axios({
+            url: "/api/login",
+            method: "post",
+            data: "username=" + this.loginForm.username + "&password=" + this.loginForm.password
+          }).then((res) => {
+            if (res.data.code == 200) {
+              console.log(res.data)
+              const storage = {
+                'name': this.loginForm.username,
+                'role': res.data.role
+              }
+              window.localStorage.setItem("user", JSON.stringify(storage))
+              this.$message({ type: 'success', message: '登录成功' })
+              switch (storage.role) {
+                case 1:
+                  this.$router.push("/admin/dashboard")
+                  break
+                case 2:
+                  this.$router.push("/user")
+                  break
+              }
+            } else {
+              this.loading = false
+              this.$message({ type: 'error', message: '用户名或密码错误' })
+            }
+          })
+        }
+        else {
+
+        }
+      })
+      console.log(this.loginForm)
+    }
+  }
 }
 </script>
 
@@ -98,8 +104,15 @@ export default {
 /* 修复input 背景不协调 和光标变色 */
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
 
-$bg:#283443;
-$light_gray:#fff;
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0%;
+}
+
+$bg: #283443;
+$light_gray: #fff;
 $cursor: #fff;
 
 @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
@@ -139,12 +152,10 @@ $cursor: #fff;
     color: #454545;
   }
 }
-</style>
 
-<style lang="scss" scoped>
-$bg:#2d3a4b;
-$dark_gray:#889aa4;
-$light_gray:#eee;
+$bg: #2d3a4b;
+$dark_gray: #889aa4;
+$light_gray: #eee;
 
 .login-container {
   min-height: 100%;
