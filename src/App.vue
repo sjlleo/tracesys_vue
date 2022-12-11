@@ -37,10 +37,14 @@ export default {
           } else {
             switch (r.data.role) {
                 case 1:
-                  this.$router.push("/admin/dashboard")
+                  if (this.$route.fullPath.indexOf("admin") == -1 && this.$route.fullPath.indexOf("chart") == -1) {
+                    this.$router.push("/admin/dashboard")
+                  }
                   break
                 case 2:
-                  this.$router.push("/user")
+                if (this.$route.fullPath.indexOf("user") == -1 && this.$route.fullPath.indexOf("chart") == -1) {
+                    this.$router.push("/user/dashboard")
+                  }
                   break
               }
           }

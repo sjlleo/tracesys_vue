@@ -1,6 +1,8 @@
 <template>
-
-        <div ref="chart" style="height:400px; width: 100%;"></div>
+    <div>
+        <div ref="chart" v-show="show" style="height:400px; width: 100%;"></div>
+        <el-empty v-if="!show" style="height:400px; width: 100%;" description="暂无数据"></el-empty>
+    </div>
 </template>
 
 <script>
@@ -11,7 +13,8 @@ export default {
         return {
             ip: "",
             myChart: undefined,
-            chartData: []
+            chartData: [],
+            show: true,
         }
     },
     methods: {
@@ -21,8 +24,16 @@ export default {
                 url: "/api/result",
                 data: postData,
             }).then((d) => {
+
                 this.chartData = d.data.res
                 this.$bus.$emit('routeTableData', this.chartData)
+                if (d.data.res == 0) {
+                    this.myChart.hideLoading();
+                    this.show = false;
+                    return
+                }
+                this.show = true;
+
                 this.chartData = this.chartData.filter((v) => {
                     return v.created_time == this.chartData[0].created_time
                 })
@@ -167,10 +178,12 @@ export default {
         }
     },
     async mounted() {
+        this.show = true;
         this.radioID = this.$route.params.nodeID
         this.myChart = this.echarts.init(this.$refs.chart);
         this.myChart.showLoading();
         await this.$bus.$on('ttlChartData', async (data) => {
+            this.$message.info("数据加载中...")
             this.myChart.showLoading();
             this.ip = data.targetIP
             await this.fetchData(data)

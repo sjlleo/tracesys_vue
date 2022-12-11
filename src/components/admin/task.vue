@@ -350,8 +350,14 @@ export default {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
-            }).then(() => {
-                this.testRow(index, id)
+            }).then(async () => {
+                const loading = this.$loading({
+                    lock: true,
+                    text: '处理中，如计算结果满足条件会发送信件，这需要较长的时间，请耐心等待',
+                    background: 'rgba(255, 255, 255, 1)'
+                });
+                await this.testRow(index, id)
+                loading.close()
             }).catch(() => {
                 this.$message({
                     type: 'info',
@@ -391,8 +397,8 @@ export default {
                 }
             })
         },
-        testRow(index, id) {
-            this.axios.get('/api/task/test/' + id).then((d) => {
+        async testRow(index, id) {
+            await this.axios.get('/api/task/test/' + id).then((d) => {
                 if (d.data.code == 200) {
                     this.$message({
                         type: 'info',

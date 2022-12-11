@@ -17,11 +17,6 @@
                     <el-statistic group-separator=","  :value="statistics.task" title="任务数"></el-statistic>
                 </div>
             </el-col>
-            <el-col :span="6">
-                <div>
-                    <el-statistic group-separator=","  :value="statistics.user" title="用户数"></el-statistic>
-                </div>
-            </el-col>
         </el-row>
         <div v-loading="mapLoading" class="map-container" id="map-container">
         </div>
@@ -33,7 +28,7 @@ export default {
     name: "AdminIndex",
     data() {
         return {
-            username: "admin",
+            username: "user",
             statistics: {},
             map: null,
             OSMUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",

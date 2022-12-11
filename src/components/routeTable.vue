@@ -103,7 +103,11 @@ export default {
         },
         InitTable(d) {
             this.tableData = []
+
             this.tableData = Array.from(d)
+            if (this.tableData.length == 0) {
+                return
+            }
             this.ASCTableDataByID()
             this.AddNullHop()
             this.FilterHop()

@@ -11,7 +11,8 @@
                 :picker-options="pickerOptions">
             </el-date-picker>
         </div>
-        <div ref="chart" style="height:400px;"></div>
+        <div ref="chart" v-show="show" style="height:400px;"></div>
+        <el-empty v-if="!show" style="height:400px; width: 100%;" description="暂无数据"></el-empty>
         <div style="width:fit-content;">
             <el-tag style="background-color: #26ff00; color: black;">0% Loss</el-tag>
             <el-tag style="background-color: #00b8ff; color: azure;">10% Loss</el-tag>
@@ -54,6 +55,7 @@ export default {
             ttl_option: [],
             chartData: [],
             pieces: [],
+            show: true,
             select: undefined,
             pickerOptions: {
                 shortcuts: [
@@ -182,8 +184,10 @@ export default {
 
             if (this.chartData[0] == undefined) {
                 this.myChart.hideLoading();
+                this.show = false
                 return
             }
+            this.show = true
             var targetIPMinTTL = this.countMaxTTL()
             if (this.select == undefined || this.ttl_option.indexOf(this.select) == -1) {
                 this.select = this.ttl_option[this.ttl_option.length - 1]

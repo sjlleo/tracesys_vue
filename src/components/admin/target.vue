@@ -49,7 +49,7 @@
       </el-col>
     </el-row>
 
-    <el-table v-loading="loading" style="margin-top: 20px;" :data="tableData">
+    <el-table v-if="tableRefresh" v-loading="loading" style="margin-top: 20px;" :data="tableData">
       <el-table-column prop="ID" label="序号" width="180">
       </el-table-column>
       <el-table-column prop="ip" label="IP" width="180">
@@ -135,6 +135,7 @@ export default {
   name: "target",
   data() {
     return {
+      tableRefresh: true,
       options: [],
       options_methods: [
         { value: 0, label: "ICMP" },
@@ -173,16 +174,21 @@ export default {
   },
   methods: {
     getGeo() {
-      this.tableData.forEach( async (r,i) => {
+      this.tableData.forEach(async (r, i) => {
         let str = await this.getGeoPromise(r)
-        this.tableData[i].geo = str
+        this.tableRefresh = false
+        this.$nextTick(() => {
+          this.tableData[i].geo = str
+          this.tableRefresh = true
+        })
+
       })
       // this.$set(this.tableData,index,row);
     },
     async getGeoPromise(row) {
       let str = ''
       await this.axios.get('https://ip.trace.ac/api/v1/' + row.ip + '?token=leomoe2022').then((r) => {
-        str =  " " + r.data.country + " " + r.data.prov + " " + r.data.city;
+        str = " " + r.data.country + " " + r.data.prov + " " + r.data.city;
       })
       return str
     },
@@ -232,15 +238,17 @@ export default {
             method: 'post',
             url: '/api/target/add',
             data: postData
-          }).then((d) => {
+          }).then(async (d) => {
             if (d.data.code == 200) {
               this.$message({
                 type: "success",
                 message: "添加成功"
               })
               this.loading = true
-              this.refreshTable()
               this.dialogVisible = false
+
+              await this.refreshTable()
+              this.getGeo()
             } else {
               this.$message({
                 type: "error",
@@ -330,6 +338,7 @@ export default {
       this.axios.delete('/api/target/' + id).then((d) => {
         if (d.data.code == 200) {
           this.tableData.splice(index, 1)
+          this.pagination.total -= 1
           this.$message({
             type: 'success',
             message: '删除成功',

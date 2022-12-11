@@ -1,6 +1,6 @@
 <template>
   <el-tabs type="border-card">
-    <el-tab-pane label="节点管理"></el-tab-pane>
+    <el-tab-pane label="IP 校准审计"></el-tab-pane>
     <el-row :gutter="20">
       <el-col :span="6">
         <el-input placeholder="请输入IP" @keyup.enter.native="search" v-model="ip" clearable></el-input>
@@ -11,70 +11,62 @@
         </el-row>
       </el-col>
     </el-row>
-    <el-row :gutter="20" style="margin-top: 30px;">
-      <el-col :span="6">
-        <el-button icon="el-icon-plus" size="small" @click="addNode" type="primary">添加节点</el-button>
-        <el-dialog title="添加节点信息" :visible.sync="dialogVisible" width="30%">
-          <div>
-            <label>您的节点 IP：</label>
-            <el-input v-model="editForm.IP"></el-input>
-          </div>
-          <div style="margin-top: 20px;">
-            <label> 您的节点密钥：</label>
-            <el-input placeholder="留空自动生成" v-model="editForm.secret"></el-input>
-          </div>
-          <div style="margin-top: 20px">
-            <label>权限：</label>
-            <el-radio-group v-model="editForm.Role" size="small">
-              <el-radio-button :label="1">管理员</el-radio-button>
-              <el-radio-button :label="2">用户</el-radio-button>
-            </el-radio-group>
-          </div>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false">取 消</el-button>
-            <el-button type="primary" :loading="loading" @click="dialogSubmit">确 定</el-button>
-          </span>
-        </el-dialog>
-      </el-col>
-    </el-row>
 
     <el-table v-if="showtable" v-loading="loading" style="margin-top: 20px;" :data="tableData">
-      <el-table-column prop="ID" label="序号" width="100">
+      <el-table-column prop="id" label="序号" width="100">
       </el-table-column>
-      <el-table-column prop="IP" label="IP" width="250">
+      <el-table-column prop="ip" label="IP" width="250">
       </el-table-column>
-      <el-table-column prop="geo" label="地理位置" width="150">
+      <el-table-column prop="prefix" label="Prefix" width="90">
       </el-table-column>
-      <el-table-column prop="Role" label="权限" width="90">
+      <el-table-column label="地理位置" width="200" :formatter="concatenate_country_province_city">
+      </el-table-column>
+      <el-table-column prop="asn" label="自治编号" width="90">
+      </el-table-column>
+      <el-table-column prop="domain" label="ISP 域名" width="200">
+      </el-table-column>
+      <el-table-column prop="createdTime" label="提交时间" width="190">
+      </el-table-column>
+      <el-table-column prop="authStatus" label="状态" width="90">
         <template slot-scope="scope">
-          <el-tag type="success" v-if="scope.row.Role == 1">管理员</el-tag>
-          <el-tag v-if="scope.row.Role == 2">用户</el-tag>
+          <el-tag v-if="(scope.row.authStatus == 0)" type="warning">未审核</el-tag>
+          <el-tag v-if="(scope.row.authStatus == 1)" type="success">通过</el-tag>
+          <el-tag v-if="(scope.row.authStatus == 2)" type="danger">拒绝</el-tag>
         </template>
-      </el-table-column>
-      <el-table-column prop="secret" label="密钥" width="250">
-      </el-table-column>
-      <el-table-column prop="Lastseen" label="最后一次在线时间">
       </el-table-column>
       <el-table-column>
         <template slot-scope="scope">
-          <el-row :gutter="15">
-            <el-col :span="5">
+          <el-row :gutter="2">
+            <el-col :span="3">
               <el-button icon="el-icon-edit" type="text" @click="handleEdit(scope.row)">编辑</el-button>
-              <el-dialog title="编辑节点信息" :visible.sync="dialogEditVisible" width="30%">
+              <el-dialog title="编辑 IP 审计信息" :visible.sync="dialogEditVisible" width="30%">
                 <div>
-                  <label>您的节点 IP：</label>
-                  <el-input v-model="editForm.IP"></el-input>
+                  <label>IP：</label>
+                  <el-input v-model="editForm.ip"></el-input>
                 </div>
                 <div style="margin-top: 20px;">
-                  <label> 您的节点密钥：</label>
-                  <el-input v-model="editForm.secret"></el-input>
+                  <label>Prefix：</label>
+                  <el-input v-model.number="editForm.prefix"></el-input>
                 </div>
-                <div style="margin-top: 20px">
-                  <label>权限：</label>
-                  <el-radio-group v-model="editForm.Role" size="small">
-                    <el-radio-button :label="1">管理员</el-radio-button>
-                    <el-radio-button :label="2">用户</el-radio-button>
-                  </el-radio-group>
+                <div style="margin-top: 20px;">
+                  <label>ASN 号码：</label>
+                  <el-input v-model.number="editForm.asn"></el-input>
+                </div>
+                <div style="margin-top: 20px;">
+                  <label>国家：</label>
+                  <el-input v-model="editForm.country"></el-input>
+                </div>
+                <div style="margin-top: 20px;">
+                  <label>省份：</label>
+                  <el-input v-model="editForm.province"></el-input>
+                </div>
+                <div style="margin-top: 20px;">
+                  <label>城市：</label>
+                  <el-input v-model="editForm.city"></el-input>
+                </div>
+                <div style="margin-top: 20px;">
+                  <label>域名：</label>
+                  <el-input v-model="editForm.domain"></el-input>
                 </div>
                 <span slot="footer" class="dialog-footer">
                   <el-button @click="dialogEditVisible = false">取 消</el-button>
@@ -82,12 +74,17 @@
                 </span>
               </el-dialog>
             </el-col>
-            <el-col :span="5">
-              <el-button icon="el-icon-delete" @click="deleteConfirm(scope.$index, scope.row.ID)" type="text">删除
+            <el-col v-if="scope.row.authStatus == 0 || scope.row.authStatus == 2" :span="3">
+              <el-button icon="el-icon-circle-check" @click="acceptReview(scope.row)" type="text">通过
+              </el-button>
+
+            </el-col>
+            <el-col v-if="scope.row.authStatus == 0 || scope.row.authStatus == 1" :span="3">
+              <el-button icon="el-icon-circle-close" @click="declineReview(scope.row)" type="text">拒绝
               </el-button>
             </el-col>
-            <el-col :span="5">
-              <el-button icon="el-icon-connection" @click="oneKeyInstall(scope.row)" type="text">快捷对接
+            <el-col :span="3">
+              <el-button icon="el-icon-delete" @click="deleteConfirm(scope.$index, scope.row.id)" type="text">删除
               </el-button>
             </el-col>
           </el-row>
@@ -131,23 +128,44 @@ export default {
     }
   },
   methods: {
-     getGeo() {
-      this.tableData.forEach( async (r,i) => {
-        let str = await this.getGeoPromise(r)
-        this.tableData[i].geo = str
-      })
-      // this.$set(this.tableData,index,row);
+    concatenate_country_province_city(scope) {
+      return scope.country + " " + scope.province + " " + scope.city
     },
-    async getGeoPromise(row) {
-      let str = ''
-      await this.axios.get('https://ip.trace.ac/api/v1/' + row.IP + '?token=leomoe2022').then((r) => {
-        str =  " " + r.data.country + " " + r.data.prov + " " + r.data.city;
+    acceptReview(row) {
+      this.axios.get('/api/ip/pass/' + row.id).then((d) => {
+        if (d.data.code == 200) {
+          this.$message({
+            type: 'success',
+            message: '操作成功',
+          })
+          row.authStatus = 1
+        } else {
+          this.$message({
+            type: 'error',
+            message: d.data.error,
+          })
+        }
       })
-      return str
+    },
+    declineReview(row) {
+      this.axios.get('/api/ip/decline/' + row.id).then((d) => {
+        if (d.data.code == 200) {
+          this.$message({
+            type: 'success',
+            message: '操作成功',
+          })
+          row.authStatus = 2
+        } else {
+          this.$message({
+            type: 'error',
+            message: d.data.error,
+          })
+        }
+      })
     },
     search() {
       this.loading = true
-      this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
+      this.axios.get('/api/ip/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
         this.tableData = res.data.data
         this.pagination.total = res.data.total
         this.loading = false
@@ -163,7 +181,7 @@ export default {
     },
     async refreshTable() {
       this.loading = true
-      await this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes).then((res) => {
+      await this.axios.get('/api/ip/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes).then((res) => {
         this.tableData = res.data.data
         this.pagination.total = res.data.total
         this.loading = false
@@ -178,18 +196,17 @@ export default {
         case "add":
           this.axios({
             method: 'post',
-            url: '/api/node/add',
+            url: '/api/ip/add',
             data: 'ip=' + this.editForm.IP + '&role=' + this.editForm.Role + '&secret=' + this.editForm.secret
-          }).then(async (d) => {
+          }).then((d) => {
             if (d.data.code == 200) {
               this.$message({
                 type: "success",
                 message: "添加成功"
               })
               this.loading = true
+              this.refreshTable()
               this.dialogVisible = false
-              await this.refreshTable()
-              await this.getGeo()
             } else {
               this.$message({
                 type: "error",
@@ -229,25 +246,6 @@ export default {
       this.dialogType = "add"
       this.dialogVisible = true
     },
-    oneKeyInstall(row) {
-      this.$confirm('是否复制命令？', '快捷对接', {
-        confirmButtonText: '复制',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let command = "bash <(curl -Ls https://leo.moe/traceClient/install.sh) " + window.location.host + " " + row.secret
-        navigator.clipboard.writeText(command);
-        this.$message({
-            type: 'success',
-            message: '复制成功',
-          })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消复制'
-        })
-      })
-    },
     deleteConfirm(index, id) {
       this.$confirm('此操作将永久删除该节点, 是否继续?', '提示', {
         confirmButtonText: '确定',
@@ -275,10 +273,10 @@ export default {
         .catch(_ => { });
     },
     deleteRow(index, id) {
-      this.axios.delete('/api/node/' + id).then((d) => {
+      this.axios.delete('/api/ip/' + id).then((d) => {
         if (d.data.code == 200) {
           this.tableData.splice(index, 1)
-          this.pagination.total -= 1
+          this.pagination.total = this.pagination.total - 1
           this.$message({
             type: 'success',
             message: '删除成功',
@@ -294,7 +292,6 @@ export default {
   },
   async mounted() {
     await this.refreshTable()
-    this.getGeo()
   }
 }
 

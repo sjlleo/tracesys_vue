@@ -28,6 +28,9 @@
                 <el-menu-item-group>
                     <el-menu-item index="/admin/ip">IP 综合查询</el-menu-item>
                 </el-menu-item-group>
+                <el-menu-item-group>
+                    <el-menu-item index="/admin/ipReview">IP 批阅</el-menu-item>
+                </el-menu-item-group>
             </el-submenu>
 
             <el-submenu index="5">
