@@ -177,7 +177,7 @@ export default {
       return scope.country + " " + scope.province + " " + scope.city
     },
     modelDownload() {
-
+      window.open("/api/ip/model")
     },
     handleUploadSuccess() {
       this.$message.success("上传成功")
