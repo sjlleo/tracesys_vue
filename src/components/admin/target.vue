@@ -56,19 +56,21 @@
       </el-table-column>
       <el-table-column prop="geo" label="地理位置" width="150">
       </el-table-column>
-      <el-table-column prop="interval" label="监测间隔" width="180">
+      <el-table-column prop="interval" label="监测间隔" width="120">
       </el-table-column>
-      <el-table-column prop="method" label="协议" width="180">
+      <el-table-column prop="method" label="协议" width="120">
         <template slot-scope="scope">
           <el-tag v-if="scope.row.method == 0">ICMP</el-tag>
           <el-tag v-if="scope.row.method == 1">TCP</el-tag>
           <el-tag v-if="scope.row.method == 2">UDP</el-tag>
         </template>
       </el-table-column>
+      <el-table-column v-if="this.$route.fullPath.indexOf('user') == -1" prop="CreatedUserID" label="创建用户 ID" width="120">
+      </el-table-column>
       <el-table-column>
         <template slot-scope="scope">
-          <el-row :gutter="10">
-            <el-col :span="5">
+          <el-row>
+            <el-col :span="3">
               <el-button icon="el-icon-edit" type="text" @click="handleEdit(scope.row)">编辑</el-button>
               <el-dialog title="编辑监控信息" :visible.sync="dialogEditVisible" width="30%">
                 <div>
@@ -106,11 +108,11 @@
                 </span>
               </el-dialog>
             </el-col>
-            <el-col :span="5">
+            <el-col :span="3">
               <el-button icon="el-icon-delete" @click="deleteConfirm(scope.$index, scope.row.ID)" type="text">删除
               </el-button>
             </el-col>
-            <el-col :span="5">
+            <el-col :span="3">
               <el-button icon="el-icon-s-marketing" @click="pushShow(scope.row)" type="text">查看数据
               </el-button>
             </el-col>
@@ -202,13 +204,14 @@ export default {
         }
       })
     },
-    search() {
+    async search() {
       this.loading = true
-      this.axios.get('/api/target/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
+      await this.axios.get('/api/target/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
         this.tableData = res.data.data
         this.pagination.total = res.data.total
         this.loading = false
       })
+      this.getGeo()
     },
     handleSizeChange(size) {
       this.pagination.sizes = size

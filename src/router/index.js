@@ -128,6 +128,11 @@ router.beforeEach((to, from, next) => {
     if (to.meta.isAuth) {
         console.log(localStorage.getItem('user'))
         if (localStorage.getItem('user') != null) {
+            let obj = JSON.parse(localStorage.getItem('user'))
+            // 判断是不是用户权限
+            if (obj.role == 2 && to.path.indexOf("user") == -1) {
+                return
+            }
             next()
         }
     } else {

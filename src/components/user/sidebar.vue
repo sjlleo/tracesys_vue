@@ -1,7 +1,7 @@
 <template>
     <el-aside style="background-color: rgb(238, 241, 246)" width="200px">
         <el-menu router>
-
+            <el-menu-item index="/user/dashboard"><i class="el-icon-odometer"></i>仪表盘</el-menu-item>
             <el-submenu index="1">
                 <template slot="title"><i class="el-icon-s-opportunity"></i>节点管理</template>
                 <el-menu-item-group>
@@ -20,6 +20,7 @@
                 <template slot="title"><i class="el-icon-menu"></i>IP 数据</template>
                 <el-menu-item-group>
                     <el-menu-item index="/user/ip">IP 综合查询</el-menu-item>
+                    <el-menu-item index="/user/ipReview">IP 审计</el-menu-item>
                 </el-menu-item-group>
             </el-submenu>
 
@@ -34,7 +35,7 @@
                 <template slot="title"><i class="el-icon-s-tools"></i>设置</template>
                 <el-menu-item-group>
                     <el-menu-item index="/user/password">修改密码</el-menu-item>
-                    <el-menu-item index="/user/info">修改信息</el-menu-item>
+                    <!-- <el-menu-item index="/user/info">修改信息</el-menu-item> -->
                     <el-menu-item index="/" @click="logout"> 退出登录</el-menu-item>
                 </el-menu-item-group>
             </el-submenu>
@@ -55,6 +56,7 @@ export default {
     methods: {
         logout() {
             this.axios.get('/api/logout')
+            localStorage.removeItem("user");
         }
     }
 }

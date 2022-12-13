@@ -182,7 +182,7 @@ export default {
             this.beforeIndex = 1
             this.chartData = this.chartDataOrigin
 
-            if (this.chartData[0] == undefined) {
+            if (this.chartData.length < 2) {
                 this.myChart.hideLoading();
                 this.show = false
                 return

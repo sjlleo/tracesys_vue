@@ -192,7 +192,7 @@ export default {
                         } else {
                             this.$message({
                                 type: "error",
-                                message: d.data.error
+                                message: d.data.msg
                             })
                         }
                         this.loading = false
@@ -214,7 +214,7 @@ export default {
                         } else {
                             this.$message({
                                 type: "error",
-                                message: d.data.error
+                                message: d.data.msg
                             })
                         }
                         this.loading = false

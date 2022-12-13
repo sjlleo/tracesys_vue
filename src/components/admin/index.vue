@@ -45,7 +45,7 @@ export default {
         getIPWhois(ip) {
             this.axios({
                 method: 'get',
-                url: 'http://ipwho.is/' + ip,
+                url: 'https://ipwho.is/' + ip,
             }).then((d) => {
                 if (d.data.success == false) {
                     return

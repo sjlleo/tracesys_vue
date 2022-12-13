@@ -407,7 +407,7 @@ export default {
                 } else {
                     this.$message({
                         type: 'error',
-                        message: d.data.error,
+                        message: d.data.msg,
                     })
                 }
             })

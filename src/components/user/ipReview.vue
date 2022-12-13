@@ -9,45 +9,61 @@
         <el-row>
           <el-button type="primary" @click="search" plain>查询</el-button>
         </el-row>
-        <el-row :gutter="15">
-            <el-col :span="5">
-              <el-button icon="el-icon-edit" type="text">添加 IP 审计</el-button>
-              <el-dialog title="添加 IP 审计信息" :visible.sync="dialogVisible" width="30%">
-                <div>
-                  <label>IP：</label>
-                  <el-input v-model="editForm.ip"></el-input>
-                </div>
-                <div style="margin-top: 20px;">
-                  <label>Prefix：</label>
-                  <el-input v-model.number="editForm.prefix"></el-input>
-                </div>
-                <div style="margin-top: 20px;">
-                  <label>ASN 号码：</label>
-                  <el-input v-model.number="editForm.asn"></el-input>
-                </div>
-                <div style="margin-top: 20px;">
-                  <label>国家：</label>
-                  <el-input v-model="editForm.country"></el-input>
-                </div>
-                <div style="margin-top: 20px;">
-                  <label>省份：</label>
-                  <el-input v-model="editForm.province"></el-input>
-                </div>
-                <div style="margin-top: 20px;">
-                  <label>城市：</label>
-                  <el-input v-model="editForm.city"></el-input>
-                </div>
-                <div style="margin-top: 20px;">
-                  <label>域名：</label>
-                  <el-input v-model="editForm.domain"></el-input>
-                </div>
-                <span slot="footer" class="dialog-footer">
-                  <el-button @click="dialogVisible = false">取 消</el-button>
-                  <el-button type="primary" :loading="loading" @click="dialogSubmit">确 定</el-button>
-                </span>
-              </el-dialog>
-            </el-col>
-        </el-row>
+      </el-col>
+    </el-row>
+    <el-row style="margin-top: 30px;">
+      <el-col :span="2">
+        <el-button icon="el-icon-plus" size="small" @click="addNode" type="primary">添加 IP 审计</el-button>
+        <el-dialog title="添加 IP 审计信息" :visible.sync="dialogVisible" width="30%">
+          <div>
+            <label>IP：</label>
+            <el-input v-model="editForm.ip"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
+            <label>Prefix：</label>
+            <el-input v-model.number="editForm.prefix"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
+            <label>ASN 号码：</label>
+            <el-input v-model.number="editForm.asn"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
+            <label>国家：</label>
+            <el-input v-model="editForm.country"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
+            <label>省份：</label>
+            <el-input v-model="editForm.province"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
+            <label>城市：</label>
+            <el-input v-model="editForm.city"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
+            <label>域名：</label>
+            <el-input v-model="editForm.domain"></el-input>
+          </div>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" :loading="loading" @click="dialogSubmit">确 定</el-button>
+          </span>
+        </el-dialog>
+      </el-col>
+      <el-col :span="2">
+        <el-button icon="el-icon-plus" size="small" @click="modelDownload" type="primary">模板下载</el-button>
+      </el-col>
+      <el-col :span="2">
+        <el-button icon="el-icon-plus" size="small" @click="uploadAction" type="primary">批量上传</el-button>
+        <el-dialog title="导入 IP 数据" :visible.sync="dialogUploadVisible" width="30%">
+          <div class="upcontent">
+            <el-upload class="upload-demo" accept=".xls,.xlsx"
+              :on-success="handleUploadSuccess"
+              action="/api/ip/upload" ref="upload" multiple :limit="1">
+              <el-button size="small" type="primary">点击上传</el-button>
+            </el-upload>
+            <div class="text" style="margin-top: 10px;">支持.xlsx、.xls格式</div>
+          </div>
+        </el-dialog>
       </el-col>
     </el-row>
 
@@ -56,19 +72,26 @@
       </el-table-column>
       <el-table-column prop="ip" label="IP" width="250">
       </el-table-column>
-      <el-table-column prop="prefix" label="Prefix" width="250">
+      <el-table-column prop="prefix" label="Prefix" width="90">
       </el-table-column>
-      <el-table-column prop="asn" label="自治编号" width="150">
+      <el-table-column label="地理位置" width="200" :formatter="concatenate_country_province_city">
       </el-table-column>
-      <el-table-column prop="domain" label="ISP 域名" width="90">
+      <el-table-column prop="asn" label="自治编号" width="90">
       </el-table-column>
-      <el-table-column prop="createdTime" label="提交时间">
+      <el-table-column prop="domain" label="ISP 域名" width="200">
       </el-table-column>
-      <el-table-column prop="authStatus" label="状态">
+      <el-table-column prop="createdTime" label="提交时间" width="190">
+      </el-table-column>
+      <el-table-column prop="authStatus" label="状态" width="90">
+        <template slot-scope="scope">
+          <el-tag v-if="(scope.row.authStatus == 0)" type="warning">未审核</el-tag>
+          <el-tag v-if="(scope.row.authStatus == 1)" type="success">通过</el-tag>
+          <el-tag v-if="(scope.row.authStatus == 2)" type="danger">拒绝</el-tag>
+        </template>
       </el-table-column>
       <el-table-column>
         <template slot-scope="scope">
-          <el-row :gutter="15">
+          <el-row :gutter="5">
             <el-col :span="5">
               <el-button icon="el-icon-edit" type="text" @click="handleEdit(scope.row)">编辑</el-button>
               <el-dialog title="编辑 IP 审计信息" :visible.sync="dialogEditVisible" width="30%">
@@ -106,6 +129,10 @@
                 </span>
               </el-dialog>
             </el-col>
+            <el-col :span="3">
+              <el-button icon="el-icon-delete" @click="deleteConfirm(scope.$index, scope.row.id)" type="text">删除
+              </el-button>
+            </el-col>
           </el-row>
         </template>
       </el-table-column>
@@ -135,6 +162,7 @@ export default {
       loading: false,
       dialogVisible: false,
       dialogEditVisible: false,
+      dialogUploadVisible: false,
       dialogType: "",
       loading: true,
       ip: "",
@@ -145,6 +173,20 @@ export default {
     }
   },
   methods: {
+    concatenate_country_province_city(scope) {
+      return scope.country + " " + scope.province + " " + scope.city
+    },
+    modelDownload() {
+
+    },
+    handleUploadSuccess() {
+      this.$message.success("上传成功")
+      this.dialogUploadVisible = false
+      this.refreshTable()
+    },
+    uploadAction() {
+      this.dialogUploadVisible = true
+    },
     acceptReview(id) {
       this.axios.delete('/api/ip/pass/' + id).then((d) => {
         if (d.data.code == 200) {
@@ -287,7 +329,7 @@ export default {
         .catch(_ => { });
     },
     deleteRow(index, id) {
-      this.axios.delete('/api/ip/' + id).then((d) => {
+      this.axios.delete('/api/ip/delete/' + id).then((d) => {
         if (d.data.code == 200) {
           this.tableData.splice(index, 1)
           this.pagination.total = this.pagination.total - 1

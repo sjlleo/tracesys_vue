@@ -81,7 +81,7 @@ export default {
                   this.$router.push("/admin/dashboard")
                   break
                 case 2:
-                  this.$router.push("/user")
+                  this.$router.push("/user/dashboard")
                   break
               }
             } else {

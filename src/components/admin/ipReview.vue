@@ -273,7 +273,7 @@ export default {
         .catch(_ => { });
     },
     deleteRow(index, id) {
-      this.axios.delete('/api/ip/' + id).then((d) => {
+      this.axios.delete('/api/ip/delete/' + id).then((d) => {
         if (d.data.code == 200) {
           this.tableData.splice(index, 1)
           this.pagination.total = this.pagination.total - 1

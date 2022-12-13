@@ -5,7 +5,6 @@
                     <i class="el-icon-setting" style="margin-right: 15px"></i>
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item @click.native="logout">退出登录</el-dropdown-item>
-                        <el-dropdown-item @click.native="updateprofile">修改头像</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
                 <span>{{ user.name }}</span>
@@ -26,6 +25,7 @@ export default {
     methods: {
         logout() {
             this.axios.get('/api/logout')
+            localStorage.removeItem("user");
             this.$router.push('/')
         }
     }

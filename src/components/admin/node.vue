@@ -55,6 +55,8 @@
       </el-table-column>
       <el-table-column prop="Lastseen" label="最后一次在线时间">
       </el-table-column>
+      <el-table-column v-if="this.$route.fullPath.indexOf('user') == -1" prop="CreatedUserID" label="创建用户 ID">
+      </el-table-column>
       <el-table-column>
         <template slot-scope="scope">
           <el-row :gutter="15">
@@ -145,13 +147,14 @@ export default {
       })
       return str
     },
-    search() {
+    async search() {
       this.loading = true
-      this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
+      await this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
         this.tableData = res.data.data
         this.pagination.total = res.data.total
         this.loading = false
       })
+      this.getGeo()
     },
     handleSizeChange(size) {
       this.pagination.sizes = size
