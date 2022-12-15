@@ -213,13 +213,13 @@ export default {
       })
       this.getGeo()
     },
-    handleSizeChange(size) {
+    async handleSizeChange(size) {
       this.pagination.sizes = size
-      this.refreshTable()
+      await this.refreshTable()
     },
-    handleCurrentChange(page) {
+    async handleCurrentChange(page) {
       this.pagination.page = page
-      this.refreshTable()
+      await this.refreshTable()
     },
     async refreshTable() {
       this.loading = true
@@ -229,7 +229,7 @@ export default {
         this.loading = false
         console.log(this.tableData)
       })
-
+      this.getGeo()
     },
     dialogSubmit() {
       this.loading = true
@@ -251,7 +251,6 @@ export default {
               this.dialogVisible = false
 
               await this.refreshTable()
-              this.getGeo()
             } else {
               this.$message({
                 type: "error",
@@ -358,7 +357,6 @@ export default {
   async mounted() {
     await this.refreshTable()
     this.getNodeInfo()
-    this.getGeo()
   }
 }
 

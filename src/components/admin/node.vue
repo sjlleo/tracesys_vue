@@ -171,6 +171,7 @@ export default {
         this.pagination.total = res.data.total
         this.loading = false
       })
+      this.getGeo()
     },
     dialogSubmit() {
       this.loading = true
@@ -192,7 +193,6 @@ export default {
               this.loading = true
               this.dialogVisible = false
               await this.refreshTable()
-              await this.getGeo()
             } else {
               this.$message({
                 type: "error",
@@ -297,7 +297,6 @@ export default {
   },
   async mounted() {
     await this.refreshTable()
-    this.getGeo()
   }
 }
 

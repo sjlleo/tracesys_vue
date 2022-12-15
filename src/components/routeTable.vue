@@ -111,7 +111,7 @@ export default {
             this.ASCTableDataByID()
             this.AddNullHop()
             this.FilterHop()
-            this.getGeo()
+            // this.getGeo()
         }
     },
     data() {
