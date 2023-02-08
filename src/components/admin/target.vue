@@ -20,6 +20,10 @@
             <el-input v-model="editForm.ip"></el-input>
           </div>
           <div style="margin-top: 30px">
+            <label>您的监测名称：</label>
+            <el-input v-model="editForm.alias"></el-input>
+          </div>
+          <div style="margin-top: 30px">
             <label>监测间隔（秒）</label>
             <el-input v-model.number="editForm.interval"></el-input>
           </div>
@@ -50,11 +54,11 @@
     </el-row>
 
     <el-table v-if="tableRefresh" v-loading="loading" style="margin-top: 20px;" :data="tableData">
-      <el-table-column prop="ID" label="序号" width="180">
+      <el-table-column prop="ID" label="序号" width="100">
       </el-table-column>
       <el-table-column prop="ip" label="IP" width="180">
       </el-table-column>
-      <el-table-column prop="geo" label="地理位置" width="150">
+      <el-table-column prop="alias" label="监测名称" width="150">
       </el-table-column>
       <el-table-column prop="interval" label="监测间隔" width="120">
       </el-table-column>
@@ -65,9 +69,10 @@
           <el-tag v-if="scope.row.method == 2">UDP</el-tag>
         </template>
       </el-table-column>
-      <el-table-column v-if="this.$route.fullPath.indexOf('user') == -1" prop="CreatedUserID" label="创建用户 ID" width="120">
+      <el-table-column v-if="this.$route.fullPath.indexOf('user') == -1" prop="CreatedUserID" label="创建用户 ID"
+        width="120">
       </el-table-column>
-      <el-table-column>
+      <el-table-column width="450">
         <template slot-scope="scope">
           <el-row>
             <el-col :span="3">
@@ -76,6 +81,10 @@
                 <div>
                   <label>您的监控 IP：</label>
                   <el-input v-model="editForm.ip"></el-input>
+                </div>
+                <div style="margin-top: 30px">
+                  <label>您的监测名称：</label>
+                  <el-input v-model="editForm.alias"></el-input>
                 </div>
                 <div style="margin-top: 30px">
                   <label>监测间隔（秒）</label>
@@ -175,25 +184,6 @@ export default {
     }
   },
   methods: {
-    getGeo() {
-      this.tableData.forEach(async (r, i) => {
-        let str = await this.getGeoPromise(r)
-        this.tableRefresh = false
-        this.$nextTick(() => {
-          this.tableData[i].geo = str
-          this.tableRefresh = true
-        })
-
-      })
-      // this.$set(this.tableData,index,row);
-    },
-    async getGeoPromise(row) {
-      let str = ''
-      await this.axios.get('https://ip.trace.ac/api/v1/' + row.ip + '?token=leomoe2022').then((r) => {
-        str = " " + r.data.country + " " + r.data.prov + " " + r.data.city;
-      })
-      return str
-    },
     pushShow(rowData) {
       this.$router.push({
         name: 'chartInfo',
@@ -211,7 +201,6 @@ export default {
         this.pagination.total = res.data.total
         this.loading = false
       })
-      this.getGeo()
     },
     async handleSizeChange(size) {
       this.pagination.sizes = size
@@ -229,7 +218,6 @@ export default {
         this.loading = false
         console.log(this.tableData)
       })
-      this.getGeo()
     },
     dialogSubmit() {
       this.loading = true

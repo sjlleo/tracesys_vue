@@ -20,6 +20,10 @@
             <el-input v-model="editForm.IP"></el-input>
           </div>
           <div style="margin-top: 20px;">
+            <label> 您的节点名称：</label>
+            <el-input v-model="editForm.alias"></el-input>
+          </div>
+          <div style="margin-top: 20px;">
             <label> 您的节点密钥：</label>
             <el-input placeholder="留空自动生成" v-model="editForm.secret"></el-input>
           </div>
@@ -39,11 +43,11 @@
     </el-row>
 
     <el-table v-if="showtable" v-loading="loading" style="margin-top: 20px;" :data="tableData">
-      <el-table-column prop="ID" label="序号" width="100">
+      <el-table-column prop="ID" label="序号" width="50">
       </el-table-column>
       <el-table-column prop="IP" label="IP" width="250">
       </el-table-column>
-      <el-table-column prop="geo" label="地理位置" width="150">
+      <el-table-column prop="alias" label="节点名称">
       </el-table-column>
       <el-table-column prop="Role" label="权限" width="90">
         <template slot-scope="scope">
@@ -51,7 +55,7 @@
           <el-tag v-if="scope.row.Role == 2">用户</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="secret" label="密钥" width="250">
+      <el-table-column prop="secret" label="密钥">
       </el-table-column>
       <el-table-column prop="Lastseen" label="最后一次在线时间">
       </el-table-column>
@@ -59,13 +63,17 @@
       </el-table-column>
       <el-table-column>
         <template slot-scope="scope">
-          <el-row :gutter="15">
-            <el-col :span="5">
+          <el-row :gutter="1">
+            <el-col :span="8">
               <el-button icon="el-icon-edit" type="text" @click="handleEdit(scope.row)">编辑</el-button>
               <el-dialog title="编辑节点信息" :visible.sync="dialogEditVisible" width="30%">
                 <div>
                   <label>您的节点 IP：</label>
                   <el-input v-model="editForm.IP"></el-input>
+                </div>
+                <div style="margin-top: 20px;">
+                  <label> 您的节点名称：</label>
+                  <el-input v-model="editForm.alias"></el-input>
                 </div>
                 <div style="margin-top: 20px;">
                   <label> 您的节点密钥：</label>
@@ -84,11 +92,11 @@
                 </span>
               </el-dialog>
             </el-col>
-            <el-col :span="5">
+            <el-col :span="8">
               <el-button icon="el-icon-delete" @click="deleteConfirm(scope.$index, scope.row.ID)" type="text">删除
               </el-button>
             </el-col>
-            <el-col :span="5">
+            <el-col :span="8">
               <el-button icon="el-icon-connection" @click="oneKeyInstall(scope.row)" type="text">快捷对接
               </el-button>
             </el-col>
@@ -133,20 +141,6 @@ export default {
     }
   },
   methods: {
-     getGeo() {
-      this.tableData.forEach( async (r,i) => {
-        let str = await this.getGeoPromise(r)
-        this.tableData[i].geo = str
-      })
-      // this.$set(this.tableData,index,row);
-    },
-    async getGeoPromise(row) {
-      let str = ''
-      await this.axios.get('https://ip.trace.ac/api/v1/' + row.IP + '?token=leomoe2022').then((r) => {
-        str =  " " + r.data.country + " " + r.data.prov + " " + r.data.city;
-      })
-      return str
-    },
     async search() {
       this.loading = true
       await this.axios.get('/api/node/list?page=' + this.pagination.page + "&size=" + this.pagination.sizes + "&parm=" + this.ip).then((res) => {
@@ -171,7 +165,6 @@ export default {
         this.pagination.total = res.data.total
         this.loading = false
       })
-      this.getGeo()
     },
     dialogSubmit() {
       this.loading = true
@@ -183,7 +176,7 @@ export default {
           this.axios({
             method: 'post',
             url: '/api/node/add',
-            data: 'ip=' + this.editForm.IP + '&role=' + this.editForm.Role + '&secret=' + this.editForm.secret
+            data: 'ip=' + this.editForm.IP + '&role=' + this.editForm.Role + '&alias=' + this.editForm.alias + '&secret=' + this.editForm.secret
           }).then(async (d) => {
             if (d.data.code == 200) {
               this.$message({
@@ -241,9 +234,9 @@ export default {
         let command = "bash <(curl -Ls https://leo.moe/traceClient/install.sh) " + window.location.host + " " + row.secret
         navigator.clipboard.writeText(command);
         this.$message({
-            type: 'success',
-            message: '复制成功',
-          })
+          type: 'success',
+          message: '复制成功',
+        })
       }).catch(() => {
         this.$message({
           type: 'info',

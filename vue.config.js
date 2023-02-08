@@ -3,7 +3,7 @@ module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave:false,
   devServer: {
-    proxy: 'https://api.trace.ac',
+    proxy: 'https://tra.trace.ac',
     port: 8080
   },
 })
